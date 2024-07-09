@@ -1,5 +1,6 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 
 User = get_user_model()
 
@@ -18,4 +19,22 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', ''),
             password=validated_data['password']
         )
+        return user
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        if email and password:
+            user = authenticate(email=email, password=password)
+            if not user:
+                raise AuthenticationFailed('Invalid credentials, try again')
+        else:
+            raise AuthenticationFailed('Email and password are required')
+        
         return user
