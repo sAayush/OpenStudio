@@ -1,6 +1,7 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.conf import settings
 from .managers import CustomUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
@@ -13,7 +14,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'firstp_name', 'last_name']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     def __str__(self):
         return self.email
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    skills = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.user.username
