@@ -1,9 +1,10 @@
-from rest_framework import generics, status
+from .serializers import *
+from .models import Profile
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, LoginSerializer
+from rest_framework import generics, status, permissions
 
 User = get_user_model()
 
@@ -38,3 +39,19 @@ class LoginView(generics.GenericAPIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }, status=status.HTTP_200_OK)
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
+
+class ProfileDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Profile.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        return self.request.user.profile
