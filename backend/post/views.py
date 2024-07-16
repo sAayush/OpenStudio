@@ -1,6 +1,10 @@
+from rest_framework import generics, status
+from rest_framework.response import Response
 from rest_framework import generics, permissions
+from utils.notifications import NotificationService
 from .models import Post, Repository, Directory, File
 from .serializers import PostSerializer, PostCreateUpdateSerializer, RepositorySerializer, DirectorySerializer, FileSerializer
+
 
 class PostListCreateView(generics.ListCreateAPIView):
     queryset = Post.objects.all()
@@ -50,3 +54,33 @@ class FileCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         directory = Directory.objects.get(pk=self.kwargs['directory_pk'])
         serializer.save(directory=directory)
+
+
+class PostCreateView(generics.CreateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def perform_create(self, serializer):
+        post = serializer.save(author=self.request.user)
+        # Send notification
+        notification_service = NotificationService()
+        notification_service.send_notification(
+            subject="New Post Created",
+            message=f"Post titled '{post.title}' has been created by {self.request.user.username}."
+        )
+
+class PostLikeView(generics.UpdateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def update(self, request, *args, **kwargs):
+        post = self.get_object()
+        post.likes.add(request.user)
+        post.save()
+        # Send notification
+        notification_service = NotificationService()
+        notification_service.send_notification(
+            subject="Post Liked",
+            message=f"Post titled '{post.title}' has been liked by {request.user.username}."
+        )
+        return Response(status=status.HTTP_200_OK)

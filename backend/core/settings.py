@@ -39,7 +39,6 @@ EXTERNAL_APPS = [
     'rest_framework',
     "rest_framework.authtoken",
     'rest_framework_simplejwt',
-
 ]
 
 INSTALLED_APPS += EXTERNAL_APPS
@@ -152,6 +151,13 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# notifications
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_SNS_TOPIC_ARN = os.environ.get('AWS_SNS_TOPIC_ARN')
+AWS_REGION_NAME = os.environ.get('AWS_SNS_REGION_NAME', 'ap-south-1')
 
 # JWT settings
 SIMPLE_JWT = {
